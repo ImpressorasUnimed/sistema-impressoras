@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Sistema de Impressoras</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+    --bg: rgb(0, 64, 26);
+    --card: rgb(0 0 0 / 8%);
+    --border: #000;
+    --accent: rgb(244, 121, 32);
+    --text: #fbfbfb;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    color: var(--text);
+}
+
+.background {
+    position: fixed;
+    inset: 0;
+    background: url('https://i.imgur.com/GMkHUDl.jpg') center/cover no-repeat;
+    filter: blur(8px);
+    transform: scale(1.08);
+    z-index: -2;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: -1;
+}
+
+header {
+    height: 110px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 25px;
+    background: var(--bg);
+    border-bottom: 2px solid var(--border);
+}
+
+.menu-btn {
+    font-size: 30px;
+    cursor: pointer;
+    color: var(--accent);
+}
+
+.logo {
+    height: 90px;
+    max-width: 75%;
+    object-fit: contain;
+}
+
+.layout {
+    display: flex;
+    height: calc(100vh - 110px);
+}
+
+aside {
+    width: 260px;
+    background: rgba(0,0,0,.45);
+    border-right: 2px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    transition: .3s;
+}
+
+aside.closed {
+    margin-left: -260px;
+}
+
+aside button {
+    padding: 16px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    border-radius: 18px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+aside button.active,
+aside button:hover {
+    background: rgba(244,121,32,.25);
+}
+
+main {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.section {
+    display: none;
+    max-width: 1000px;
+}
+
+.section.active { display: block; }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+input, select {
+    padding: 14px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+}
+
+button.primary {
+    padding: 16px 34px;
+    background: var(--accent);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    border: 2px solid var(--border);
+    text-align: center;
+}
+
+th {
+    background: rgba(0,0,0,.4);
+    color: var(--accent);
+}
+
+td button {
+    padding: 6px 12px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    header { height: 95px; }
+    .logo { height: 70px; }
+
+    aside {
+        position: fixed;
+        top: 95px;
+        height: calc(100% - 95px);
+        z-index: 10;
+    }
+
+    aside.closed {
+        transform: translateX(-100%);
+        margin-left: 0;
+    }
+
+    .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="background"></div>
+<div class="overlay"></div>
+
+<header>
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    <img src="https://i.imgur.com/ssKFTTB.jpg" class="logo">
+</header>
+
+<div class="layout">
+    <aside id="menu" class="closed">
+        <button class="active" onclick="mostrar('pesquisa', this)">🔍 Pesquisa</button>
+        <button onclick="mostrar('cadastro', this)">🛠️ Cadastro</button>
+    </aside>
+
+    <main>
+        <section id="pesquisa" class="section active">
+            <div class="form-grid">
+                <select id="tipoBusca" onchange="buscar()">
+                    <option value="codigo">Código</option>
+                    <option value="setor">Setor</option>
+                    <option value="ip">IP</option>
+                    <option value="modelo">Toner</option>
+                </select>
+                <input id="campoBusca" placeholder="Digite para pesquisar..." onkeyup="buscar()">
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Setor</th>
+                        <th>IP</th>
+                        <th>Toner</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="resultado"></tbody>
+            </table>
+        </section>
+
+        <section id="cadastro" class="section">
+            <div class="form-grid">
+                <input id="codigo" placeholder="Código (H-107)">
+                <input id="setor" placeholder="Setor">
+                <input id="ip" placeholder="IP">
+                <input id="modelo" placeholder="Modelo do Toner">
+            </div>
+            <button class="primary" onclick="salvar()">Salvar</button>
+        </section>
+    </main>
+</div>
+
+<script>
+const API = "https://sheetdb.io/api/v1/pyn96szziv9xf";
+
+function toggleMenu() {
+    menu.classList.toggle("closed");
+}
+
+function mostrar(id, btn) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    document.querySelectorAll("aside button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    if (window.innerWidth <= 768) toggleMenu();
+}
+
+async function buscar() {
+    const tipo = tipoBusca.value;
+    const termo = campoBusca.value;
+    let url = API;
+
+    if (termo) url += `/search?${tipo}=${encodeURIComponent(termo)}`;
+
+    const r = await fetch(url);
+    const dados = await r.json();
+
+    resultado.innerHTML = "";
+    dados.forEach(i => {
+        resultado.innerHTML += `
+        <tr>
+            <td>${i.codigo}</td>
+            <td>${i.setor}</td>
+            <td>${i.ip}</td>
+            <td>${i.modelo}</td>
+            <td>
+                <button onclick="excluir('${i.codigo}')">🗑️</button>
+            </td>
+        </tr>`;
+    });
+}
+
+async function salvar() {
+    const dados = {
+        codigo: codigo.value.toUpperCase(),
+        setor: setor.value.toUpperCase(),
+        ip: ip.value,
+        modelo: modelo.value
+    };
+
+    if (!dados.codigo || !dados.ip) {
+        alert("Código e IP obrigatórios");
+        return;
+    }
+
+    await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: [dados] })
+    });
+
+    codigo.value = setor.value = ip.value = modelo.value = "";
+    buscar();
+}
+
+async function excluir(codigo) {
+    if (!confirm("Deseja excluir esta impressora?")) return;
+    await fetch(`${API}/codigo/${codigo}`, { method: "DELETE" });
+    buscar();
+}
+
+buscar();
+</script>
+
+</body>
+</html>
