@@ -141,6 +141,7 @@ table {
     background: rgba(0,0,0,0.3);
     border-radius: 15px;
     overflow: hidden;
+    margin-top: 20px;
 }
 
 th, td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
@@ -148,12 +149,13 @@ th { background: rgba(0,0,0,0.5); color: var(--accent); text-transform: uppercas
 
 /* Estilo das Imagens das Impressoras */
 .printer-img {
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
     object-fit: contain;
     background: white;
     border-radius: 8px;
     padding: 4px;
+    border: 2px solid var(--accent);
 }
 
 .btn-del {
@@ -163,7 +165,10 @@ th { background: rgba(0,0,0,0.5); color: var(--accent); text-transform: uppercas
     padding: 8px;
     border-radius: 8px;
     cursor: pointer;
+    transition: 0.2s;
 }
+
+.btn-del:hover { background: #ff4d4d; color: white; }
 
 @media (max-width: 768px) {
     aside { position: fixed; top: 110px; height: 100%; z-index: 10; }
@@ -195,7 +200,7 @@ th { background: rgba(0,0,0,0.5); color: var(--accent); text-transform: uppercas
                     <option value="codigo">Código</option>
                     <option value="setor">Setor</option>
                     <option value="ip">IP</option>
-                    <option value="modelo">Modelo/Toner</option>
+                    <option value="modelo">Modelo</option>
                 </select>
                 <input id="campoBusca" placeholder="Pesquisar..." onkeyup="buscar()">
             </div>
@@ -245,21 +250,21 @@ th { background: rgba(0,0,0,0.5); color: var(--accent); text-transform: uppercas
 <script>
 const API = "https://sheetdb.io/api/v1/pyn96szziv9xf";
 
-// Dicionário de Imagens (Substitua os links pelas imagens reais)
+// Dicionário de Imagens com links DIRETOS corrigidos
 const databaseImagens = {
-    "RICOH-M320F": "https://imgur.com/TnVzF7n",
-    "SAMSUNG - M4080FX": "https://imgur.com/AvaC68X",
-    "RICOH-P311": "https://imgur.com/9ZmWD89",
-    "RICOH-SP3500N": "https://imgur.com/7Tebo1j",
-    "SAMSUNG - M4070 FR": "https://imgur.com/zDY55Wb",
-    "SANSUNG - M4020DN": "https://imgur.com/RyxlkRS",
-    "BROTHER NC-9200h": "https://imgur.com/ga2viDQ",
-    "RICOH-SP3710SF": "https://imgur.com/dtVuDle",
-    "RICOH-SP3710DN": "https://imgur.com/RxSTyIZ",
+    "RICOH-M320F": "https://i.imgur.com/TnVzF7n.png",
+    "SAMSUNG - M4080FX": "https://i.imgur.com/AvaC68X.png",
+    "RICOH-P311": "https://i.imgur.com/9ZmWD89.png",
+    "RICOH-SP3500N": "https://i.imgur.com/7Tebo1j.png",
+    "SAMSUNG - M4070 FR": "https://i.imgur.com/zDY55Wb.png",
+    "SANSUNG - M4020DN": "https://i.imgur.com/RyxlkRS.png",
+    "BROTHER NC-9200h": "https://i.imgur.com/ga2viDQ.png",
+    "RICOH-SP3710SF": "https://i.imgur.com/dtVuDle.png",
+    "RICOH-SP3710DN": "https://i.imgur.com/RxSTyIZ.png",
     "Scanner Dr C240": "https://cdn-icons-png.flaticon.com/512/2822/2822965.png",
-    "Zebra ZD220": "https://imgur.com/AChOQKS",
-    "Zebra Zd230": "https://imgur.com/R0onxJb",
-    "default": "https://via.placeholder.com/60?text=Maq"
+    "Zebra ZD220": "https://i.imgur.com/AChOQKS.png",
+    "Zebra Zd230": "https://i.imgur.com/R0onxJb.png",
+    "default": "https://via.placeholder.com/65?text=MAQ"
 };
 
 function toggleMenu() { menu.classList.toggle("closed"); }
@@ -273,8 +278,8 @@ function mostrar(id, btn) {
 }
 
 async function buscar() {
-    const tipo = tipoBusca.value;
-    const termo = campoBusca.value;
+    const tipo = document.getElementById('tipoBusca').value;
+    const termo = document.getElementById('campoBusca').value;
     let url = API;
 
     if (termo) url += `/search?${tipo}=*${encodeURIComponent(termo)}*`;
@@ -282,33 +287,35 @@ async function buscar() {
     try {
         const r = await fetch(url);
         const dados = await r.json();
-        resultado.innerHTML = "";
+        const tabelaCorpo = document.getElementById('resultado');
+        tabelaCorpo.innerHTML = "";
 
         dados.forEach(i => {
-            // Pega a imagem baseada no modelo, se não existir usa a default
             const imgUrl = databaseImagens[i.modelo] || databaseImagens["default"];
 
-            resultado.innerHTML += `
+            tabelaCorpo.innerHTML += `
             <tr>
-                <td><img src="${imgUrl}" class="printer-img"></td>
+                <td><img src="${imgUrl}" class="printer-img" alt="Foto"></td>
                 <td style="color:var(--accent); font-weight:bold;">${i.codigo}</td>
                 <td>${i.setor}</td>
-                <td><a href="http://${i.ip}" target="_blank" style="color:lightblue; text-decoration:none;">${i.ip} 🌐</a></td>
+                <td><a href="http://${i.ip}" target="_blank" style="color:#4db8ff; text-decoration:none;">${i.ip} 🌐</a></td>
                 <td>${i.modelo}</td>
                 <td>
                     <button class="btn-del" onclick="excluir('${i.codigo}')">🗑️</button>
                 </td>
             </tr>`;
         });
-    } catch(e) { console.error("Erro ao buscar dados"); }
+    } catch(e) { 
+        console.error("Erro ao buscar dados"); 
+    }
 }
 
 async function salvar() {
     const dados = {
-        codigo: codigo.value.toUpperCase().trim(),
-        setor: setor.value.toUpperCase().trim(),
-        ip: ip.value.trim(),
-        modelo: modelo.value
+        codigo: document.getElementById('codigo').value.toUpperCase().trim(),
+        setor: document.getElementById('setor').value.toUpperCase().trim(),
+        ip: document.getElementById('ip').value.trim(),
+        modelo: document.getElementById('modelo').value
     };
 
     if (!dados.codigo || !dados.ip || !dados.modelo) {
@@ -316,24 +323,38 @@ async function salvar() {
         return;
     }
 
-    await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: [dados] })
-    });
+    try {
+        await fetch(API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: [dados] })
+        });
 
-    // Limpa campos
-    codigo.value = setor.value = ip.value = modelo.value = "";
-    alert("Cadastrado com sucesso!");
-    buscar();
+        // Limpa campos
+        document.getElementById('codigo').value = "";
+        document.getElementById('setor').value = "";
+        document.getElementById('ip').value = "";
+        document.getElementById('modelo').value = "";
+        
+        alert("Cadastrado com sucesso!");
+        mostrar('pesquisa', document.querySelector('aside button'));
+        buscar();
+    } catch(e) {
+        alert("Erro ao salvar no banco de dados.");
+    }
 }
 
 async function excluir(cod) {
-    if (!confirm(`Excluir impressora ${cod}?`)) return;
-    await fetch(`${API}/codigo/${cod}`, { method: "DELETE" });
-    buscar();
+    if (!confirm(`Deseja realmente excluir a impressora ${cod}?`)) return;
+    try {
+        await fetch(`${API}/codigo/${cod}`, { method: "DELETE" });
+        buscar();
+    } catch(e) {
+        alert("Erro ao excluir registro.");
+    }
 }
 
+// Inicializa a tabela
 buscar();
 </script>
 
