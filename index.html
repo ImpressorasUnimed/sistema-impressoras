@@ -1,187 +1,186 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Sistema de Impressoras - Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Sistema de Impressoras - Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-:root {
-    --bg: rgb(0, 64, 26);
-    --card: rgba(255, 255, 255, 0.08);
-    --border: #000;
-    --accent: rgb(244, 121, 32);
-    --text: #fbfbfb;
-}
+    <style>
+        :root {
+            --bg: rgb(0, 64, 26);
+            --card: rgba(255, 255, 255, 0.08);
+            --border: #000;
+            --accent: rgb(244, 121, 32);
+            --text: #fbfbfb;
+        }
 
-* { box-sizing: border-box; }
+        * { box-sizing: border-box; }
 
-html, body {
-    margin: 0;
-    height: 100%;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    color: var(--text);
-    background-color: #1a1a1a;
-    overflow: hidden; /* Evita scroll duplo na raiz */
-}
+        html, body {
+            margin: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: var(--text);
+            background-color: #1a1a1a;
+            overflow: hidden;
+        }
 
-/* CORREÇÃO DA IMAGEM DE FUNDO */
-.background {
-    position: fixed;
-    inset: 0;
-    /* Troquei para uma imagem de alta definição de escritório/tecnologia caso o link anterior falhe */
-    background: url('https://i.imgur.com/GMkHUDl.jpeg') center/cover no-repeat;
-    filter: blur(10px); /* Aplica o desfoque */
-    transform: scale(1.1); /* Aumenta um pouco para não aparecer bordas brancas no desfoque */
-    z-index: -2;
-}
+        /* FUNDO COM A IMAGEM SOLICITADA */
+        .background {
+            position: fixed;
+            inset: 0;
+            background: url('https://i.imgur.com/GMkHUDl.jpeg') center/cover no-repeat;
+            filter: blur(8px); /* Desfoque para profundidade */
+            transform: scale(1.05); /* Evita bordas brancas causadas pelo blur */
+            z-index: -2;
+        }
 
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65); /* Escurece o fundo para destacar os dados */
-    z-index: -1;
-}
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7); /* Escurece o fundo para contraste */
+            z-index: -1;
+        }
 
-header {
-    height: 110px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 0 25px;
-    background: var(--bg);
-    border-bottom: 3px solid var(--accent);
-    position: relative;
-    z-index: 10;
-}
+        header {
+            height: 110px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 0 25px;
+            background: var(--bg);
+            border-bottom: 3px solid var(--accent);
+            position: relative;
+            z-index: 10;
+        }
 
-.menu-btn {
-    font-size: 30px;
-    cursor: pointer;
-    color: var(--accent);
-}
+        .menu-btn {
+            font-size: 30px;
+            cursor: pointer;
+            color: var(--accent);
+        }
 
-.logo {
-    height: 80px;
-    max-width: 75%;
-    object-fit: contain;
-}
+        .logo {
+            height: 80px;
+            max-width: 75%;
+            object-fit: contain;
+        }
 
-.layout {
-    display: flex;
-    height: calc(100vh - 110px);
-    position: relative;
-    z-index: 5;
-}
+        .layout {
+            display: flex;
+            height: calc(100vh - 110px);
+            position: relative;
+            z-index: 5;
+        }
 
-aside {
-    width: 260px;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(5px); /* Efeito de vidro no menu */
-    border-right: 2px solid var(--border);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transition: .3s;
-}
+        aside {
+            width: 260px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            border-right: 2px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: .3s;
+        }
 
-aside.closed { margin-left: -260px; }
+        aside.closed { margin-left: -260px; }
 
-aside button {
-    padding: 16px;
-    background: var(--card);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--text);
-    border-radius: 12px;
-    cursor: pointer;
-    text-align: left;
-    transition: 0.2s;
-}
+        aside button {
+            padding: 16px;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.2s;
+        }
 
-aside button.active, aside button:hover {
-    background: var(--accent);
-    color: #000;
-    font-weight: bold;
-}
+        aside button.active, aside button:hover {
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
+        }
 
-main {
-    flex: 1;
-    padding: 30px;
-    overflow-y: auto;
-}
+        main {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
 
-.section { display: none; max-width: 1100px; margin: 0 auto; }
-.section.active { display: block; }
+        .section { display: none; max-width: 1100px; margin: 0 auto; }
+        .section.active { display: block; }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
 
-input, select {
-    padding: 14px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid var(--accent);
-    border-radius: 10px;
-    color: var(--text);
-    outline: none;
-}
+        input, select {
+            padding: 14px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            color: var(--text);
+            outline: none;
+        }
 
-button.primary {
-    padding: 16px 40px;
-    background: var(--accent);
-    border: none;
-    border-radius: 12px;
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
+        button.primary {
+            padding: 16px 40px;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-button.primary:hover { opacity: 0.9; transform: translateY(-2px); }
+        button.primary:hover { opacity: 0.9; transform: translateY(-2px); }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: rgba(0,0,0,0.5);
-    border-radius: 15px;
-    overflow: hidden;
-    margin-top: 20px;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0,0,0,0.6);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
 
-th, td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
-th { background: rgba(0,0,0,0.7); color: var(--accent); text-transform: uppercase; font-size: 12px; }
+        th, td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        th { background: rgba(0,0,0,0.8); color: var(--accent); text-transform: uppercase; font-size: 12px; }
 
-.printer-img {
-    width: 65px;
-    height: 65px;
-    object-fit: contain;
-    background: white;
-    border-radius: 8px;
-    padding: 4px;
-    border: 2px solid var(--accent);
-}
+        .printer-img {
+            width: 65px;
+            height: 65px;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+            padding: 4px;
+            border: 2px solid var(--accent);
+        }
 
-.btn-del {
-    background: transparent;
-    border: 1px solid #ff4d4d;
-    color: #ff4d4d;
-    padding: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-}
+        .btn-del {
+            background: transparent;
+            border: 1px solid #ff4d4d;
+            color: #ff4d4d;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-.btn-del:hover { background: #ff4d4d; color: white; }
+        .btn-del:hover { background: #ff4d4d; color: white; }
 
-@media (max-width: 768px) {
-    aside { position: fixed; top: 110px; height: 100%; z-index: 10; }
-    aside.closed { transform: translateX(-100%); margin-left: 0; }
-}
-</style>
+        @media (max-width: 768px) {
+            aside { position: fixed; top: 110px; height: 100%; z-index: 10; }
+            aside.closed { transform: translateX(-100%); margin-left: 0; }
+        }
+    </style>
 </head>
 
 <body>
