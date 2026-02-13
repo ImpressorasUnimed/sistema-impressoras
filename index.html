@@ -2,13 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Sistema de Impressoras</title>
+<title>Sistema de Impressoras - Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 :root {
     --bg: rgb(0, 64, 26);
-    --card: rgb(0 0 0 / 8%);
+    --card: rgba(255, 255, 255, 0.08);
     --border: #000;
     --accent: rgb(244, 121, 32);
     --text: #fbfbfb;
@@ -19,8 +19,9 @@
 html, body {
     margin: 0;
     height: 100%;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Arial, sans-serif;
     color: var(--text);
+    background-color: #1a1a1a;
 }
 
 .background {
@@ -35,7 +36,7 @@ html, body {
 .overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.45);
+    background: rgba(0,0,0,.55);
     z-index: -1;
 }
 
@@ -46,7 +47,7 @@ header {
     gap: 20px;
     padding: 0 25px;
     background: var(--bg);
-    border-bottom: 2px solid var(--border);
+    border-bottom: 3px solid var(--accent);
 }
 
 .menu-btn {
@@ -56,7 +57,7 @@ header {
 }
 
 .logo {
-    height: 90px;
+    height: 80px;
     max-width: 75%;
     object-fit: contain;
 }
@@ -68,33 +69,32 @@ header {
 
 aside {
     width: 260px;
-    background: rgba(0,0,0,.45);
+    background: rgba(0,0,0,.6);
     border-right: 2px solid var(--border);
     padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     gap: 14px;
     transition: .3s;
 }
 
-aside.closed {
-    margin-left: -260px;
-}
+aside.closed { margin-left: -260px; }
 
 aside button {
     padding: 16px;
     background: var(--card);
-    border: 2px solid var(--border);
+    border: 1px solid rgba(255,255,255,0.1);
     color: var(--text);
-    border-radius: 18px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 15px;
+    text-align: left;
+    transition: 0.2s;
 }
 
-aside button.active,
-aside button:hover {
-    background: rgba(244,121,32,.25);
+aside button.active, aside button:hover {
+    background: var(--accent);
+    color: #000;
+    font-weight: bold;
 }
 
 main {
@@ -103,80 +103,71 @@ main {
     overflow-y: auto;
 }
 
-.section {
-    display: none;
-    max-width: 1000px;
-}
-
+.section { display: none; max-width: 1100px; margin: 0 auto; }
 .section.active { display: block; }
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     margin-bottom: 20px;
 }
 
 input, select {
     padding: 14px;
-    background: var(--card);
-    border: 2px solid var(--border);
-    border-radius: 14px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
     color: var(--text);
+    outline: none;
 }
 
 button.primary {
-    padding: 16px 34px;
+    padding: 16px 40px;
     background: var(--accent);
-    border: 2px solid var(--border);
-    border-radius: 18px;
+    border: none;
+    border-radius: 12px;
     color: #000;
     font-weight: bold;
     cursor: pointer;
+    transition: 0.3s;
 }
+
+button.primary:hover { opacity: 0.9; transform: translateY(-2px); }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 15px;
+    overflow: hidden;
 }
 
-th, td {
-    padding: 12px;
-    border: 2px solid var(--border);
-    text-align: center;
+th, td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+th { background: rgba(0,0,0,0.5); color: var(--accent); text-transform: uppercase; font-size: 12px; }
+
+/* Estilo das Imagens das Impressoras */
+.printer-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    background: white;
+    border-radius: 8px;
+    padding: 4px;
 }
 
-th {
-    background: rgba(0,0,0,.4);
-    color: var(--accent);
-}
-
-td button {
-    padding: 6px 12px;
-    border: 2px solid var(--border);
-    background: var(--card);
-    color: var(--text);
+.btn-del {
+    background: transparent;
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 8px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
 @media (max-width: 768px) {
-    header { height: 95px; }
-    .logo { height: 70px; }
-
-    aside {
-        position: fixed;
-        top: 95px;
-        height: calc(100% - 95px);
-        z-index: 10;
-    }
-
-    aside.closed {
-        transform: translateX(-100%);
-        margin-left: 0;
-    }
-
-    .form-grid { grid-template-columns: 1fr; }
+    aside { position: fixed; top: 110px; height: 100%; z-index: 10; }
+    aside.closed { transform: translateX(-100%); margin-left: 0; }
 }
 </style>
 </head>
@@ -204,18 +195,19 @@ td button {
                     <option value="codigo">Código</option>
                     <option value="setor">Setor</option>
                     <option value="ip">IP</option>
-                    <option value="modelo">Toner</option>
+                    <option value="modelo">Modelo/Toner</option>
                 </select>
-                <input id="campoBusca" placeholder="Digite para pesquisar..." onkeyup="buscar()">
+                <input id="campoBusca" placeholder="Pesquisar..." onkeyup="buscar()">
             </div>
 
             <table>
                 <thead>
                     <tr>
+                        <th>Equipamento</th>
                         <th>Código</th>
                         <th>Setor</th>
                         <th>IP</th>
-                        <th>Toner</th>
+                        <th>Modelo</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -225,12 +217,27 @@ td button {
 
         <section id="cadastro" class="section">
             <div class="form-grid">
-                <input id="codigo" placeholder="Código (H-107)">
+                <input id="codigo" placeholder="Código (ex: H-107)">
                 <input id="setor" placeholder="Setor">
-                <input id="ip" placeholder="IP">
-                <input id="modelo" placeholder="Modelo do Toner">
+                <input id="ip" placeholder="Endereço IP">
+                
+                <select id="modelo">
+                    <option value="">Selecione o Modelo</option>
+                    <option value="RICOH-M320F">RICOH-M320F</option>
+                    <option value="SAMSUNG - M4080FX">SAMSUNG - M4080FX</option>
+                    <option value="RICOH-P311">RICOH-P311</option>
+                    <option value="RICOH-SP3500N">RICOH-SP3500N</option>
+                    <option value="SAMSUNG - M4070 FR">SAMSUNG - M4070 FR</option>
+                    <option value="SANSUNG - M4020DN">SANSUNG - M4020DN</option>
+                    <option value="BROTHER NC-9200h">BROTHER NC-9200h</option>
+                    <option value="RICOH-SP3710SF">RICOH-SP3710SF</option>
+                    <option value="RICOH-SP3710DN">RICOH-SP3710DN</option>
+                    <option value="Scanner Dr C240">Scanner Dr C240</option>
+                    <option value="Zebra ZD220">Zebra ZD220</option>
+                    <option value="Zebra Zd230">Zebra Zd230</option>
+                </select>
             </div>
-            <button class="primary" onclick="salvar()">Salvar</button>
+            <button class="primary" onclick="salvar()">Cadastrar Impressora</button>
         </section>
     </main>
 </div>
@@ -238,9 +245,24 @@ td button {
 <script>
 const API = "https://sheetdb.io/api/v1/pyn96szziv9xf";
 
-function toggleMenu() {
-    menu.classList.toggle("closed");
-}
+// Dicionário de Imagens (Substitua os links pelas imagens reais)
+const databaseImagens = {
+    "RICOH-M320F": "https://imgur.com/TnVzF7n",
+    "SAMSUNG - M4080FX": "https://imgur.com/AvaC68X",
+    "RICOH-P311": "https://imgur.com/9ZmWD89",
+    "RICOH-SP3500N": "https://imgur.com/7Tebo1j",
+    "SAMSUNG - M4070 FR": "https://imgur.com/zDY55Wb",
+    "SANSUNG - M4020DN": "https://imgur.com/RyxlkRS",
+    "BROTHER NC-9200h": "https://imgur.com/ga2viDQ",
+    "RICOH-SP3710SF": "https://imgur.com/dtVuDle",
+    "RICOH-SP3710DN": "https://imgur.com/RxSTyIZ",
+    "Scanner Dr C240": "https://cdn-icons-png.flaticon.com/512/2822/2822965.png",
+    "Zebra ZD220": "https://imgur.com/AChOQKS",
+    "Zebra Zd230": "https://imgur.com/R0onxJb",
+    "default": "https://via.placeholder.com/60?text=Maq"
+};
+
+function toggleMenu() { menu.classList.toggle("closed"); }
 
 function mostrar(id, btn) {
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
@@ -255,36 +277,42 @@ async function buscar() {
     const termo = campoBusca.value;
     let url = API;
 
-    if (termo) url += `/search?${tipo}=${encodeURIComponent(termo)}`;
+    if (termo) url += `/search?${tipo}=*${encodeURIComponent(termo)}*`;
 
-    const r = await fetch(url);
-    const dados = await r.json();
+    try {
+        const r = await fetch(url);
+        const dados = await r.json();
+        resultado.innerHTML = "";
 
-    resultado.innerHTML = "";
-    dados.forEach(i => {
-        resultado.innerHTML += `
-        <tr>
-            <td>${i.codigo}</td>
-            <td>${i.setor}</td>
-            <td>${i.ip}</td>
-            <td>${i.modelo}</td>
-            <td>
-                <button onclick="excluir('${i.codigo}')">🗑️</button>
-            </td>
-        </tr>`;
-    });
+        dados.forEach(i => {
+            // Pega a imagem baseada no modelo, se não existir usa a default
+            const imgUrl = databaseImagens[i.modelo] || databaseImagens["default"];
+
+            resultado.innerHTML += `
+            <tr>
+                <td><img src="${imgUrl}" class="printer-img"></td>
+                <td style="color:var(--accent); font-weight:bold;">${i.codigo}</td>
+                <td>${i.setor}</td>
+                <td><a href="http://${i.ip}" target="_blank" style="color:lightblue; text-decoration:none;">${i.ip} 🌐</a></td>
+                <td>${i.modelo}</td>
+                <td>
+                    <button class="btn-del" onclick="excluir('${i.codigo}')">🗑️</button>
+                </td>
+            </tr>`;
+        });
+    } catch(e) { console.error("Erro ao buscar dados"); }
 }
 
 async function salvar() {
     const dados = {
-        codigo: codigo.value.toUpperCase(),
-        setor: setor.value.toUpperCase(),
-        ip: ip.value,
+        codigo: codigo.value.toUpperCase().trim(),
+        setor: setor.value.toUpperCase().trim(),
+        ip: ip.value.trim(),
         modelo: modelo.value
     };
 
-    if (!dados.codigo || !dados.ip) {
-        alert("Código e IP obrigatórios");
+    if (!dados.codigo || !dados.ip || !dados.modelo) {
+        alert("Preencha todos os campos corretamente.");
         return;
     }
 
@@ -294,13 +322,15 @@ async function salvar() {
         body: JSON.stringify({ data: [dados] })
     });
 
+    // Limpa campos
     codigo.value = setor.value = ip.value = modelo.value = "";
+    alert("Cadastrado com sucesso!");
     buscar();
 }
 
-async function excluir(codigo) {
-    if (!confirm("Deseja excluir esta impressora?")) return;
-    await fetch(`${API}/codigo/${codigo}`, { method: "DELETE" });
+async function excluir(cod) {
+    if (!confirm(`Excluir impressora ${cod}?`)) return;
+    await fetch(`${API}/codigo/${cod}`, { method: "DELETE" });
     buscar();
 }
 
