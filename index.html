@@ -239,7 +239,7 @@ th { background: rgba(0, 0, 0, 0.7); color: var(--accent); text-transform: upper
                     <option value="RICOH-P311">RICOH-P311</option>
                     <option value="RICOH-SP3500N">RICOH-SP3500N</option>
                     <option value="SAMSUNG - M4070 FR">SAMSUNG - M4070 FR</option>
-                    <option value="SANSUNG - M4020DN">SANSUNG - M4020DN</option>
+                    <option value="SAMSUNG - M4020DN">SAMSUNG - M4020DN</option>
                     <option value="BROTHER NC-9200h">BROTHER NC-9200h</option>
                     <option value="RICOH-SP3710SF">RICOH-SP3710SF</option>
                     <option value="RICOH-SP3710DN">RICOH-SP3710DN</option>
@@ -262,6 +262,7 @@ const databaseImagens = {
     "RICOH-P311": "https://i.imgur.com/9ZmWD89.png",
     "RICOH-SP3500N": "https://i.imgur.com/7Tebo1j.png",
     "SAMSUNG - M4070 FR": "https://i.imgur.com/zDY55Wb.png",
+    "SAMSUNG - M4020DN": "https://i.imgur.com/RyxlkRS.png",
     "SANSUNG - M4020DN": "https://i.imgur.com/RyxlkRS.png",
     "BROTHER NC-9200h": "https://i.imgur.com/ga2viDQ.png",
     "RICOH-SP3710SF": "https://i.imgur.com/dtVuDle.png",
@@ -272,86 +273,253 @@ const databaseImagens = {
     "default": "https://via.placeholder.com/65?text=MAQ"
 };
 
-function toggleMenu() { document.getElementById("menu").classList.toggle("closed"); }
+function sanitizar(texto) {
+    const div = document.createElement("div");
+    div.textContent = texto || "";
+    return div.innerHTML;
+}
+
+function validarIP(ip) {
+    const regex = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+    return regex.test(ip);
+}
+
+function mostrarCarregando() {
+    document.getElementById("resultado").innerHTML =
+        `<tr><td colspan="6">⏳ Carregando...</td></tr>`;
+}
+
+function toggleMenu() {
+    document.getElementById("menu").classList.toggle("closed");
+}
 
 function mostrar(id, btn) {
     document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
     document.getElementById(id).classList.add("active");
-    document.querySelectorAll("aside button").forEach(b => b.classList.remove("active"));
+
+    document.querySelectorAll("aside button")
+        .forEach(b => b.classList.remove("active"));
+
     btn.classList.add("active");
-    if (window.innerWidth <= 768) toggleMenu();
+
+    if (window.innerWidth <= 768) {
+        toggleMenu();
+    }
 }
 
 async function buscar() {
-    const tipo = document.getElementById('tipoBusca').value;
-    const termo = document.getElementById('campoBusca').value;
+
+    const tipo = document.getElementById("tipoBusca").value;
+    const termo = document.getElementById("campoBusca").value.trim();
+
     let url = API;
 
-    if (termo) url += `/search?${tipo}=*${encodeURIComponent(termo)}*`;
+    if (termo) {
+        url += `/search?${tipo}=*${encodeURIComponent(termo)}*`;
+    }
+
+    mostrarCarregando();
 
     try {
-        const r = await fetch(url);
-        const dados = await r.json();
-        const tabelaCorpo = document.getElementById('resultado');
-        tabelaCorpo.innerHTML = "";
+
+        const resposta = await fetch(url);
+        const dados = await resposta.json();
+
+        const tabela = document.getElementById("resultado");
+        tabela.innerHTML = "";
+
+        if (!dados.length) {
+            tabela.innerHTML =
+                `<tr><td colspan="6">🔍 Nenhum resultado encontrado.</td></tr>`;
+            return;
+        }
+
+        dados.sort((a, b) =>
+            (a.codigo || "").localeCompare(
+                (b.codigo || ""),
+                "pt-BR",
+                { numeric: true }
+            )
+        );
 
         dados.forEach(i => {
-            const imgUrl = databaseImagens[i.modelo] || databaseImagens["default"];
 
-            tabelaCorpo.innerHTML += `
+            const img =
+                databaseImagens[i.modelo] ||
+                databaseImagens.default;
+
+            tabela.innerHTML += `
             <tr>
-                <td><img src="${imgUrl}" class="printer-img" alt="Foto"></td>
-                <td style="color:var(--accent); font-weight:bold;">${i.codigo}</td>
-                <td>${i.setor}</td>
-                <td><a href="http://${i.ip}" target="_blank" style="color:#4db8ff; text-decoration:none;">${i.ip} 🌐</a></td>
-                <td>${i.modelo}</td>
                 <td>
-                    <button class="btn-del" onclick="excluir('${i.codigo}')">🗑️</button>
+                    ${img}
+                </td>
+
+                <td style="color:var(--accent);font-weight:bold;">
+                    ${sanitizar(i.codigo)}
+                </td>
+
+                <td>${sanitizar(i.setor)}</td>
+
+                <td>
+                    http://${sanitizar(i.ip)}
+                        ${sanitizar(i.ip)} 🌐
+                    </a>
+                </td>
+
+                <td>${sanitizar(i.modelo)}</td>
+
+                <td>
+                    <button
+                        class="btn-del"
+                        onclick="excluir('${sanitizar(i.codigo)}')">
+                        🗑️
+                    </button>
                 </td>
             </tr>`;
         });
-    } catch(e) { console.error("Erro ao buscar dados"); }
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        document.getElementById("resultado").innerHTML =
+            `<tr><td colspan="6">❌ Erro ao carregar os dados.</td></tr>`;
+    }
 }
 
 async function salvar() {
+
+    const botao = document.querySelector(".primary");
+
     const dados = {
-        codigo: document.getElementById('codigo').value.toUpperCase().trim(),
-        setor: document.getElementById('setor').value.toUpperCase().trim(),
-        ip: document.getElementById('ip').value.trim(),
-        modelo: document.getElementById('modelo').value
+        codigo: document.getElementById("codigo").value.toUpperCase().trim(),
+        setor: document.getElementById("setor").value.toUpperCase().trim(),
+        ip: document.getElementById("ip").value.trim(),
+        modelo: document.getElementById("modelo").value
     };
 
-    if (!dados.codigo || !dados.ip || !dados.modelo) {
-        alert("Preencha todos os campos corretamente.");
+    if (
+        !dados.codigo ||
+        !dados.setor ||
+        !dados.ip ||
+        !dados.modelo
+    ) {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    if (!validarIP(dados.ip)) {
+        alert("Digite um IP válido.");
         return;
     }
 
     try {
+
+        botao.disabled = true;
+        botao.innerText = "Salvando...";
+
+        const consulta = await fetch(
+            `${API}/search?codigo=${encodeURIComponent(dados.codigo)}`
+        );
+
+        const existe = await consulta.json();
+
+        if (existe.length > 0) {
+            alert("Já existe uma impressora cadastrada com esse código.");
+            return;
+        }
+
         await fetch(API, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ data: [dados] })
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                data: [dados]
+            })
         });
-        document.getElementById('codigo').value = "";
-        document.getElementById('setor').value = "";
-        document.getElementById('ip').value = "";
-        document.getElementById('modelo').value = "";
-        alert("Cadastrado com sucesso!");
-        mostrar('pesquisa', document.querySelector('aside button'));
+
+        document.getElementById("codigo").value = "";
+        document.getElementById("setor").value = "";
+        document.getElementById("ip").value = "";
+        document.getElementById("modelo").value = "";
+
+        alert("✅ Cadastrado com sucesso!");
+
+        mostrar(
+            "pesquisa",
+            document.querySelector("aside button")
+        );
+
         buscar();
-    } catch(e) { alert("Erro ao salvar."); }
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        alert("Erro ao salvar.");
+
+    } finally {
+
+        botao.disabled = false;
+        botao.innerText = "Cadastrar Impressora";
+    }
 }
 
-async function excluir(cod) {
-    if (!confirm(`Deseja realmente excluir a impressora ${cod}?`)) return;
+async function excluir(codigo) {
+
+    if (!confirm(`Deseja realmente excluir ${codigo}?`)) {
+        return;
+    }
+
     try {
-        await fetch(`${API}/codigo/${cod}`, { method: "DELETE" });
+
+        await fetch(
+            `${API}/codigo/${encodeURIComponent(codigo)}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        alert("✅ Registro removido.");
+
         buscar();
-    } catch(e) { alert("Erro ao excluir."); }
+
+    } catch (erro) {
+
+        console.error(erro);
+
+        alert("Erro ao excluir.");
+    }
 }
+
+document.addEventListener("click", function(e) {
+
+    const menu = document.getElementById("menu");
+
+    if (
+        window.innerWidth <= 768 &&
+        !menu.contains(e.target) &&
+        !e.target.classList.contains("menu-btn")
+    ) {
+        menu.classList.add("closed");
+    }
+
+});
+
+document.getElementById("codigo")
+.addEventListener("input", function() {
+    this.value = this.value.toUpperCase();
+});
+
+document.getElementById("setor")
+.addEventListener("input", function() {
+    this.value = this.value.toUpperCase();
+});
 
 buscar();
 </script>
 
 </body>
 </html>
+
